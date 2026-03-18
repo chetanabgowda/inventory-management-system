@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="msapplication-TileColor" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Summary Dashboard - Inventory Management</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .summary-dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .summary-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .summary-header h1 {
+            color: #e0e0e0;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .summary-header p {
+            color: #b0b0b0;
+            font-size: 1.1rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        /* Product Management */
+        .product-management {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 40px;
+        }
+
+        .product-management h2 {
+            color: #e0e0e0;
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+        }
+
+        .product-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .product-form label {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .product-form input,
+        .product-form select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border 0.2s ease, background 0.2s ease;
+        }
+
+        .product-form input:focus,
+        .product-form select:focus {
+            border-color: rgba(102, 126, 234, 0.9);
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .product-form button {
+            grid-column: span 2;
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .product-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.35);
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .product-table th,
+        .product-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            color: #e0e0e0;
+        }
+
+        .product-table th {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+        }
+
+        .product-actions button {
+            margin-right: 8px;
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .product-actions .edit-btn {
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+        }
+
+        .product-actions .delete-btn {
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+        }
+
+        .notification {
+            padding: 14px 18px;
+            border-radius: 14px;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        .notification.success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #c8e6c9;
+        }
+
+        .notification.error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #ffcdd2;
+        }
+        .summary-card {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .summary-card .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .summary-card h3 {
+            color: #b0b0b0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .summary-card .value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #e0e0e0;
+            margin-bottom: 10px;
+        }
+
+        .summary-card .subtitle {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chart-card h3 {
+            color: #e0e0e0;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-btn .icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(26, 26, 46, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #e0e0e0;
+        }
+
+        .back-btn:hover {
+            background: rgba(26, 26, 46, 1);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+
+    <!-- Glitter Particles (same style as login page) -->
+    <div class="glitter-container" id="glitterContainer"></div>
+
+    <div class="summary-dashboard">
+        <div class="summary-header">
+            <h1>📊 Summary Dashboard</h1>
+            <p>Key metrics and insights at a glance</p>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="icon">📦</div>
+                <h3>Total Products</h3>
+                <div class="value" id="summaryTotalProducts">0</div>
+                <div class="subtitle">Items in inventory</div>
+            </div>
+
+            <div class="summary-card">
+                <div class="icon">💰</div>
+                <h3>Total Value</h3>
+                <div class="value" id="summaryTotalValue">$0.00</div>
+                <div class="subtitle">Inventory worth</div>
+            </div>
+
+            <div class="summary-card">
+                <div class="icon">⚠️</div>
+                <h3>Low Stock Items</h3>
+                <div class="value" id="summaryLowStock">0</div>
+                <div class="subtitle">Need attention</div>
+            </div>
+
+            <div class="summary-card">
+                <div class="icon">📂</div>
+                <h3>Categories</h3>
+                <div class="value" id="summaryCategories">0</div>
+                <div class="subtitle">Product categories</div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3>📈 Sales Trend</h3>
+                <div class="chart-container">
+                    <canvas id="summarySalesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>📊 Product Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="summaryProductChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <button class="action-btn" onclick="window.location.href='dashboard.html'">
+                <div class="icon">🏠</div>
+                Full Dashboard
+            </button>
+            <button class="action-btn" onclick="exportSummary()">
+                <div class="icon">📄</div>
+                Export Report
+            </button>
+            <button class="action-btn" onclick="generateInsights()">
+                <div class="icon">💡</div>
+                AI Insights
+            </button>
+            <button class="action-btn" onclick="viewAnalytics()">
+                <div class="icon">📈</div>
+                Analytics
+            </button>
+        </div>
+
+        <!-- Product Management (quick add) -->
+        <div class="product-management">
+            <h2>Quick Product Add</h2>
+            <form id="summaryProductForm" class="product-form">
+                <div>
+                    <label for="summaryProductName">Product Name</label>
+                    <input type="text" id="summaryProductName" placeholder="e.g. Wireless Mouse" required>
+                </div>
+                <div>
+                    <label for="summaryProductQuantity">Quantity</label>
+                    <input type="number" id="summaryProductQuantity" placeholder="0" min="0" required>
+                </div>
+                <div>
+                    <label for="summaryProductPrice">Price ($)</label>
+                    <input type="number" id="summaryProductPrice" placeholder="0.00" min="0" step="0.01" required>
+                </div>
+                <div>
+                    <label for="summaryProductCategory">Category</label>
+                    <select id="summaryProductCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Apparel">Apparel</option>
+                        <option value="Home">Home</option>
+                        <option value="Office">Office</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <button type="submit">Add Product</button>
+            </form>
+            <div id="summaryNotification" class="notification" style="display:none;"></div>
+
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryProductTableBody">
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 30px; color: #b0b0b0;">No products yet. Add a product to get started.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Load data from localStorage (shared with dashboard)
+        let products = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
+        let summaryProductForm;
+        let summaryProductTableBody;
+        let summaryProductName;
+        let summaryProductQuantity;
+        let summaryProductPrice;
+        let summaryProductCategory;
+        let summarySubmitButton;
+
+        // Initialize summary dashboard
+        function initSummaryPage() {
+            initProductManagement();
+            updateSummaryMetrics();
+            initializeSummaryCharts();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSummaryPage);
+        } else {
+            initSummaryPage();
+        }
+
+        function updateSummaryMetrics() {
+            // Calculate metrics
+            const totalProducts = products.length;
+            const totalValue = products.reduce((sum, product) => sum + (product.price * product.quantity), 0);
+            const lowStockItems = products.filter(product => product.quantity <= 5).length;
+            const categories = [...new Set(products.map(product => product.category))].length;
+
+            // Update display
+            document.getElementById('summaryTotalProducts').textContent = totalProducts;
+            document.getElementById('summaryTotalValue').textContent = `$${totalValue.toFixed(2)}`;
+            document.getElementById('summaryLowStock').textContent = lowStockItems;
+            document.getElementById('summaryCategories').textContent = categories;
+
+            // Refresh product table
+            renderSummaryProductTable();
+        }
+
+        function initProductManagement() {
+            summaryProductForm = document.getElementById('summaryProductForm');
+            summaryProductTableBody = document.getElementById('summaryProductTableBody');
+            summaryProductName = document.getElementById('summaryProductName');
+            summaryProductQuantity = document.getElementById('summaryProductQuantity');
+            summaryProductPrice = document.getElementById('summaryProductPrice');
+            summaryProductCategory = document.getElementById('summaryProductCategory');
+            summarySubmitButton = summaryProductForm.querySelector('button[type="submit"]');
+
+            summaryProductForm.addEventListener('submit', handleAddProduct);
+            summaryProductTableBody.addEventListener('click', handleProductTableClick);
+
+            renderSummaryProductTable();
+            summaryProductName.focus();
+        }
+
+        function handleAddProduct(event) {
+            event.preventDefault();
+
+            const name = summaryProductName.value.trim();
+            const quantity = parseInt(summaryProductQuantity.value);
+            const price = parseFloat(summaryProductPrice.value);
+            const category = summaryProductCategory.value;
+
+            if (!name || quantity < 0 || price < 0 || !category) {
+                showSummaryNotification('Please fill in all fields with valid values.', 'error');
+                return;
+            }
+
+            const newProduct = {
+                id: Date.now(),
+                name,
+                quantity,
+                price,
+                category,
+                dateAdded: new Date().toISOString()
+            };
+
+            products.push(newProduct);
+            localStorage.setItem('inventoryProducts', JSON.stringify(products));
+
+            summaryProductForm.reset();
+            summaryProductName.focus();
+            updateSummaryMetrics();
+            updateSummaryCharts();
+
+            showSummaryNotification('Product added successfully!', 'success');
+        }
+
+        function handleProductTableClick(event) {
+            const button = event.target.closest('button');
+            if (!button) return;
+
+            const row = button.closest('tr');
+            const id = row ? Number(row.dataset.id) : null;
+            if (!id) return;
+
+            const action = button.dataset.action;
+            if (action === 'edit') {
+                editSummaryProduct(id);
+            } else if (action === 'delete') {
+                deleteSummaryProduct(id);
+            }
+        }
+
+        function renderSummaryProductTable() {
+            summaryProductTableBody.innerHTML = '';
+
+            if (products.length === 0) {
+                summaryProductTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 30px; color: #b0b0b0;">No products yet. Add a product to get started.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            products.slice(0, 10).forEach(product => {
+                const totalValue = (product.quantity * product.price).toFixed(2);
+                const tr = document.createElement('tr');
+                tr.dataset.id = product.id;
+                tr.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>${product.category}</td>
+                    <td>${product.quantity}</td>
+                    <td>$${product.price.toFixed(2)}</td>
+                    <td>$${totalValue}</td>
+                    <td class="product-actions">
+                        <button type="button" class="edit-btn" data-action="edit">Edit</button>
+                        <button type="button" class="delete-btn" data-action="delete">Delete</button>
+                    </td>
+                `;
+                summaryProductTableBody.appendChild(tr);
+            });
+        }
+
+        function showSummaryNotification(message, type) {
+            const notification = document.getElementById('summaryNotification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function editSummaryProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            summaryProductName.value = product.name;
+            summaryProductQuantity.value = product.quantity;
+            summaryProductPrice.value = product.price;
+            summaryProductCategory.value = product.category;
+
+            summarySubmitButton.textContent = 'Update Product';
+
+            const updateHandler = (event) => {
+                event.preventDefault();
+
+                const name = summaryProductName.value.trim();
+                const quantity = parseInt(summaryProductQuantity.value);
+                const price = parseFloat(summaryProductPrice.value);
+                const category = summaryProductCategory.value;
+
+                if (!name || quantity < 0 || price < 0 || !category) {
+                    showSummaryNotification('Please fill in all fields with valid values.', 'error');
+                    return;
+                }
+
+                product.name = name;
+                product.quantity = quantity;
+                product.price = price;
+                product.category = category;
+
+                localStorage.setItem('inventoryProducts', JSON.stringify(products));
+                updateSummaryMetrics();
+                updateSummaryCharts();
+
+                showSummaryNotification('Product updated successfully!', 'success');
+
+                summarySubmitButton.textContent = 'Add Product';
+                summaryProductForm.removeEventListener('submit', updateHandler);
+                summaryProductForm.addEventListener('submit', handleAddProduct);
+                summaryProductForm.reset();
+                summaryProductName.focus();
+            };
+
+            summaryProductForm.removeEventListener('submit', handleAddProduct);
+            summaryProductForm.addEventListener('submit', updateHandler);
+        }
+
+        function deleteSummaryProduct(id) {
+            if (!confirm('Delete this product?')) return;
+
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem('inventoryProducts', JSON.stringify(products));
+            updateSummaryMetrics();
+            updateSummaryCharts();
+
+            showSummaryNotification('Product deleted.', 'success');
+        }
+
+        let summarySalesChart;
+        let summaryProductChart;
+
+        function initializeSummaryCharts() {
+            // Sales Trend Chart (Line Chart)
+            const salesCtx = document.getElementById('summarySalesChart').getContext('2d');
+
+            const salesData = {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Sales ($)',
+                    data: [1200, 1900, 3000, 5000, 2000, 3000],
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#4CAF50',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5
+                }]
+            };
+
+            summarySalesChart = new Chart(salesCtx, {
+                type: 'line',
+                data: salesData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Product Distribution Chart (Bar Chart)
+            const productCtx = document.getElementById('summaryProductChart').getContext('2d');
+            const productData = getProductDistributionData();
+
+            summaryProductChart = new Chart(productCtx, {
+                type: 'bar',
+                data: productData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function getProductDistributionData() {
+            const categoryValue = {};
+            products.forEach(product => {
+                const value = product.price * product.quantity;
+                categoryValue[product.category] = (categoryValue[product.category] || 0) + value;
+            });
+
+            const categories = Object.keys(categoryValue);
+            const values = Object.values(categoryValue);
+
+            return {
+                labels: categories.length > 0 ? categories : ['No Data'],
+                datasets: [{
+                    label: 'Total Value ($)',
+                    data: categories.length > 0 ? values : [0],
+                    backgroundColor: [
+                        '#667eea',
+                        '#764ba2',
+                        '#f093fb',
+                        '#4CAF50',
+                        '#FF9800',
+                        '#f44336'
+                    ],
+                    borderWidth: 1,
+                    borderColor: '#ffffff'
+                }]
+            };
+        }
+
+
+        function updateSummaryCharts() {
+            if (!summaryProductChart) return;
+
+            const updatedData = getProductDistributionData();
+            summaryProductChart.data = updatedData;
+            summaryProductChart.update();
+        }
+
+        // Quick action functions
+        function exportSummary() {
+            alert('Export functionality would be implemented here');
+        }
+
+        function generateInsights() {
+            alert('AI insights would be generated here');
+        }
+
+        function viewAnalytics() {
+            alert('Advanced analytics would be shown here');
+        }
+    </script>
+</body>
+</html>
